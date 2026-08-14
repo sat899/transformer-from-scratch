@@ -12,7 +12,10 @@ import numpy as np
 def cross_entropy_loss_one_hot(predictions, labels, eps=1e-15):
     """
     negative log likelihood loss
-    log of the predictions multiplied by the labels, summed up, negated, averaged across the batch
+    log of the predictions (probabilities) multiplied by the labels, summed up, negated, averaged across the batch
+    take the log to i) convert multiplication to addition and ii) to penalize probabilities more as they move away from the expected value
+    negate so that we turn it into something to be minimized
+
     computational complexity is O(N x C)
     large memory footprint - have to store a large sparse matrix of size (N,C)
     
@@ -23,7 +26,7 @@ def cross_entropy_loss_one_hot(predictions, labels, eps=1e-15):
     # first clip predictions to prevent log(0) issues
     predictions = np.clip(predictions, eps, 1.0 - eps)
 
-    # calculate loss (log of the predictions multiplied by the labels, summed up, negated) for each sample
+    # calculate loss (log of the predictions multiplied by the labels, summed up across all classes, negated) for each sample
     sample_loss = -np.sum(np.log(predictions) * labels, axis=1)
 
     # calculate the mean loss across the batch
@@ -54,7 +57,7 @@ def cross_entropy_loss_sparse(predictions, labels, eps=1e-15):
 
     # negative log likelihood of the probabilities of the correct class for each sample
     # note: don't need to sum since we are only looking at the correct class
-    # note: don't need to multiply by labels
+    # note: don't need to multiply by the labels since we have already selected the correct class, so this would just be multiplying everything by 1
     # just need to take the negative log of the probabilities of the correct class
     sample_loss = -np.log(correct_class_probs)
 
