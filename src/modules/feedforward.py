@@ -11,21 +11,21 @@ import numpy as np
 def linear_layer(input, weights, bias=None):
     """
     basic linear transformation of some input matrix by some weights matrix
-    y = wx + b
+    maps the input features to output classes, optionally adding a bias term
+    y = xw + b
     can use either np.matmul() or numpy's built in matrix multiplication operator here (@), they are equivalent
 
-    taking the vertical approach, treating our input as a column vector
-    input has shape [n_input, 1]
-    weights has shape [n_output, n_input]
-    bias has shape [n_output, 1]
-    output has shape [n_output, 1]
+    input has shape [n_inputs, n_input_features]
+    weights has shape [n_input_features, n_output_classes]
+    bias has shape [n_output_classes, 1]
+    output has shape [n_inputs, n_output_classes]
 
     """
     # note they must be multiplued in this order so that the inner dimensions match up
-    output = np.matmul(weights, input)
-    #output = weights @ input
+    logits = np.matmul(input, weights)
+    #output = input @ weights
 
     if bias is not None:
-        output += bias  # NumPy broadcasting handles matching dimensions automatically
+        logits += bias  # NumPy broadcasting handles matching dimensions automatically
 
-    return output
+    return logits
