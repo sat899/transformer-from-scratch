@@ -65,3 +65,58 @@ def cross_entropy_loss_sparse(predictions, labels, eps=1e-15):
     mean_loss = np.mean(sample_loss).item()
 
     return mean_loss
+
+def _calculate_gradient_1D(function, x, eps=1e-5):
+    """
+    Estimates the derivative of a 1D function using central finite differences.
+    Formula: (f(x + eps) - f(x - eps)) / (2 * eps)
+    
+    TODO: Extend to N-D inputs (partial derivatives per dimension).
+    """
+    # Perturb input forward and backward
+    f_plus = function(x + eps)
+    f_minus = function(x - eps)
+    
+    # Calculate slope across the 2*eps interval
+    return (f_plus - f_minus) / (2 * eps)
+
+def _calculate_gradient(function, x, eps=1e-5):
+    """
+    Numerically estimates the gradient for an N-dimensional vector x.
+    """
+    grad = np.zeros_like(x, dtype=np.float64)
+
+    for i in range(len(x)):
+        # Create copies to perturb only the i-th dimension
+        x_plus = x.copy().astype(np.float64)
+        x_minus = x.copy().astype(np.float64)
+
+        # Nudge dimension i up and down
+        x_plus[i] += eps
+        x_minus[i] -= eps
+
+        # Central difference for dimension i
+        grad[i] = (function(x_plus) - function(x_minus)) / (2 * eps)
+
+    return grad
+
+def gradient_descent(function, initial_point, learning_rate=0.01, n_iterations=100):
+    """
+    Performs gradient descent on any differentiable scalar function using numerical finite differences.
+    """
+    # Track the trajectory starting from the initial point
+    points = [initial_point.copy().astype(np.float64)]
+
+    for _ in range(n_iterations):
+        current_point = points[-1]
+        
+        # 1. Compute numerical gradient vector
+        grad = _calculate_gradient(function, current_point)
+        
+        # 2. Update rule: step downhill in opposite direction of gradient
+        new_point = current_point - learning_rate * grad
+        
+        # 3. Store the new coordinate
+        points.append(new_point)
+
+    return np.array(points)
