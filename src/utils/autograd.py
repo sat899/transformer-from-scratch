@@ -63,3 +63,29 @@ def linear_layer_backward(upstream_grad, inputs, weights, bias=None):
         downstream_grad_bias = None
 
     return downstream_grad_inputs, downstream_grad_weights, downstream_grad_bias
+
+def backward(loss_grad):
+    """
+    Traverses the execution log in reverse to compute gradients for all operations.
+    """
+    # 1. Reverse the log to work backward from the loss to the inputs
+    reversed_log = reversed(_EXECUTION_LOG)
+
+    # 2. Track the incoming upstream gradient for the current operation - starts as the gradient of the loss i.e. loss_grad
+    current_upstream_grad = loss_grad
+
+    # 3. Iterate through the network's execution history one layer at a time
+    param_grads = []
+
+    for backward_func, saved_tensors in reversed_log:
+
+        # 4. Execute the specific backward math for this operation
+        # Pass the incoming error first, then unpack the saved tensors (input, weight, bias)
+        downstream_grads = backward_func(current_upstream_grad, *saved_tensors)
+        downstream_grad_inputs, downstream_grad_weights, downstream_grad_bias = downstream_grads
+        param_grads.append((downstream_grad_weights, downstream_grad_bias))
+        current_upstream_grad = downstream_grad_inputs
+    
+    param_grads.reverse() # put the lust back in forward order
+    
+    return param_grads
