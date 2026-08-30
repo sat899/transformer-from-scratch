@@ -7,7 +7,7 @@ SwiGLU across NumPy and PyTorch implementations.
 """
 
 import numpy as np
-from src.utils.autograd import record_operation
+from src.utils.autograd import record_operation, linear_layer_backward
 
 def linear_layer(input, weights, bias=None):
     """
@@ -32,6 +32,6 @@ def linear_layer(input, weights, bias=None):
         logits += bias  # NumPy broadcasting handles matching dimensions automatically
 
     # record the operations so they can be added to the autograd log
-    record_operation(operation_name = "linear", inputs = [input, weights, bias], output=logits)
+    record_operation(linear_layer_backward, input, weights, bias)
 
     return logits
