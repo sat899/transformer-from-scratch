@@ -100,6 +100,15 @@ def _calculate_gradient(function, x, eps=1e-5):
 
     return grad
 
+def _update_rule(current_point, learning_rate, grad):
+    """
+    Gradient descent update rule
+    Takes current point and subtracts the gradient vector, scaled by the learning rate
+    Steps in the opposite direction of the gradient i.e. downhill
+    """
+    new_point = current_point - learning_rate * grad
+    return new_point
+
 def gradient_descent(function, initial_point, learning_rate=0.01, n_iterations=100):
     """
     Performs gradient descent on any differentiable scalar function using numerical finite differences.
@@ -114,7 +123,7 @@ def gradient_descent(function, initial_point, learning_rate=0.01, n_iterations=1
         grad = _calculate_gradient(function, current_point)
         
         # 2. Update rule: step downhill in opposite direction of gradient
-        new_point = current_point - learning_rate * grad
+        new_point = _update_rule(current_point, learning_rate, grad)
         
         # 3. Store the new coordinate
         points.append(new_point)
