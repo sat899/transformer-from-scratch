@@ -8,7 +8,7 @@ causal masking, and cross-attention variants.
 """
 
 import numpy as np
-from src.modules.linear import linear_layer
+from src.modules.activations import softmax
 
 def generate_qkv_weight_matrices(embedding_dim: int, head_dim: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -56,3 +56,11 @@ def mask_attention_scores(attention_scores: np.ndarray) -> np.ndarray:
     masked_attention_scores[binary_mask == 0] = -np.inf
 
     return masked_attention_scores
+
+def calculate_attention_weights(masked_attention_scores: np.ndarray) -> np.ndarray:
+    """
+    Passes the masked attention scores through softmax activation function
+    """
+    attention_weights = softmax(masked_attention_scores)
+    
+    return attention_weights
