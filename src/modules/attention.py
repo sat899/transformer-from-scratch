@@ -64,3 +64,12 @@ def calculate_attention_weights(masked_attention_scores: np.ndarray) -> np.ndarr
     attention_weights = softmax(masked_attention_scores)
     
     return attention_weights
+
+def calculate_contextualized_embeddings(attention_weights: np.ndarray, value_matrix: np.ndarray) -> np.ndarray:
+    """
+    Multiplies the attention weights [seq_len, seq_len] by the original value matrix [seq_len, head_dim]
+    Final output has dimensions [seq_len, head_dim]
+    """
+    contextualized_embedding = np.matmul(attention_weights, value_matrix)
+    
+    return contextualized_embedding
