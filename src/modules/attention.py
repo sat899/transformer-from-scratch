@@ -45,3 +45,14 @@ def calculate_attention_scores(query_matrix: np.ndarray, key_matrix: np.ndarray)
     attention_scores = qkt/scaling_factor
 
     return attention_scores
+
+def mask_attention_scores(attention_scores: np.ndarray) -> np.ndarray:
+    """
+    Sets future attention scores to negative infinity
+    """
+    masked_attention_scores = attention_scores.copy()
+    ones_matrix = np.ones_like(masked_attention_scores) # creates a matrix the same size as masked_attention_scores with every position set to 1
+    binary_mask = np.tril(ones_matrix) # Takes a 2D matrix m and zeroes out everything above the main diagonal, keeping only the lower triangle (hence tri-l)
+    masked_attention_scores[binary_mask == 0] = -np.inf
+
+    return masked_attention_scores
