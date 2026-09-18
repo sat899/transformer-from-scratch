@@ -1,36 +1,41 @@
 # Transformer From Scratch
 
-This is a repository / library for building and training transformer models from scratch. It is mostly intended to be a wrapper around PyTorch similar to HuggingFace Transformers, but also includes numpy implementations of core functions in some cases.
+A small library for building and training transformer models from scratch in **NumPy only**.
 
-It has primarily been created for learning purposes, though over time it may evolve into something more usable.
+It is primarily a learning codebase. The aim is that you can read any file and see exactly what a transformer step is doing.
 
-## Architecture Design Principles
+## Design principles
 
-Config-Driven Instantiation: Every component accepts a unified configuration object (e.g., TransformerConfig) to ensure consistent dimensions across layers.
+1. **Functional and modular.** Pieces of the model are small, composable functions (and a few thin helpers) rather than a class hierarchy. Attention, linear maps, activations, loss, and autograd are separate modules you can call independently.
 
-Unified Return Types: Components return explicit dataclasses (or named tuples) rather than plain tuples, preventing confusion over tensor ordering (e.g., separating hidden_states from attention_weights).
+2. **Explicit and easy to read.** Shapes, matrix multiplies, masking, and derivatives are written out in the open. Prefer a few extra lines and comments over hidden framework behaviour.
 
-Composable Sub-Layers: High-level blocks allow swapping out sub-components (e.g., using RMSNorm instead of LayerNorm, or RoPE instead of absolute positional embeddings) via simple configuration flags or class injection.
+## File structure
 
-## File Structure
-
+```
 src/
-├── config.py           # Universal configuration dataclass
-├── activations.py      # Custom/standard activation layers (GELU, SwiGLU)
-├── embeddings.py       # Token & Positional embeddings (Absolute, RoPE, ALiBi)
-├── normalization.py    # LayerNorm, RMSNorm implementations
-├── attention.py        # Multi-Head, Grouped-Query, and Causal Attention
-├── feedforward.py      # Standard MLP and Gated Feed-Forward blocks
-├── transformer.py      # Encoder/Decoder blocks and full stack assembly
-├── tokenization.py     # Clean wrapper interfaces around tokenizers
-├── data.py             # PyTorch Dataset/DataLoader utilities & collators
-└── optimisation.py     # Custom loss functions (CrossEntropy with Label Smoothing), AdamW
+├── transformer.py              # Full encoder/decoder stack (assembly)
+├── modules/
+│   ├── activations.py          # Softmax and other activations
+│   ├── attention.py            # Q/K/V, scaled scores, causal mask, attention output
+│   ├── embeddings.py           # Token and positional embeddings
+│   ├── linear.py               # Linear map y = xW + b
+│   └── normalization.py        # LayerNorm / RMSNorm
+└── utils/
+    ├── autograd.py             # Manual reverse-mode autodiff over recorded ops
+    ├── data.py                 # Batching and data helpers
+    ├── optimisation.py         # Cross-entropy loss and gradient descent
+    └── tokenization.py         # Vocabulary and integer encoding
+tests/
+├── test_activations.py
+└── test_optimisation.py
+```
 
 ## Tests
 
-Tests are built using pytest in the tests/ folder. All test files should start with `test_*` e.g. `test_activations.py`. Tests should print inputs, outputs and shapes, including of all intermediate steps.
+Tests use pytest in the `tests/` folder. Test files should start with `test_`, e.g. `test_activations.py`. Tests should print inputs, outputs, and shapes, including intermediate steps.
 
-Run testS:
+Run tests:
 
 ```
 python -m pytest -s
